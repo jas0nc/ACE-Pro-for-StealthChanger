@@ -1,44 +1,64 @@
-# ACE Pro + KTC-Easy for StealthChanger
+# ACE Pro for StealthChanger with KTC-Easy
 
-Use an Anycubic ACE Pro (Gen 1) as a **filament dryer, filament buffer, and assisted filament loader/unloader** for a 4-toolhead StealthChanger running KTC-Easy.
+A GitHub-ready starter repository for using an **Anycubic ACE Pro (Gen 1)** as a **filament dryer, filament buffer, and assisted filament transport system** for a **4-toolhead StealthChanger** running **KTC-Easy**.
 
-> Status: **ACE Pro Gen 1 is the supported target**. ACE 2 Pro is not yet a drop-in option because community Klipper drivers currently target the USB-based Gen 1 ACE Pro, while ACE 2 Pro uses RS485.[web:17][web:69][web:77]
+## Project status
 
-## What this project gives you
+- Supported target: **ACE Pro Gen 1**
+- Not yet drop-in: **ACE 2 Pro**, because community Klipper integrations target the Gen 1 USB-connected ACE Pro, while ACE 2 Pro uses RS485.[web:17][web:69][web:77]
 
-- A clear hardware modification plan for adapting ACE Pro to a 4-toolhead StealthChanger.[web:1][web:45][web:67]
-- A practical way to integrate ACE-assisted **load** and **unload** into the usual KTC-Easy workflow, instead of treating ACE as a separate system.[web:144][web:154]
-- Example Klipper config fragments and macros you can copy, tune, and version-control.
-- A GitHub-ready starting point so you can share your progress with the community.
+## Why this repo exists
 
-## Core idea
+A StealthChanger already has one extruder per tool, so the ACE Pro should not be treated like a Bambu AMS or a single-nozzle MMU. In this build, the ACE Pro acts as:
 
-In a StealthChanger, each tool already has its own extruder. That means the ACE Pro is **not** used like an AMS feeding a single hotend through a 4-in-1 hub. Instead, each ACE slot maps to one toolhead:
+- a 4-slot dryer,[web:43]
+- a 4-lane buffer,[web:1][web:7]
+- and a long-distance filament mover between spool and toolhead.[web:31][web:105]
 
-- Slot 0 -> T0
-- Slot 1 -> T1
-- Slot 2 -> T2
-- Slot 3 -> T3
-
-Each slot feeds one PTFE path directly to its matching toolhead. KTC-Easy still handles tool pickup/parking, while ACE handles drying, buffering, and long filament moves in the reverse-Bowden path.[web:144][web:145][web:31]
+KTC-Easy still handles tool pickup, park, and active tool selection.[web:144] This repository shows how to keep the normal `LOAD_FILAMENT` / `UNLOAD_FILAMENT` user workflow, but make those macros ACE-aware so the operator experience stays simple.[web:154]
 
 ## Repository layout
 
-- `docs/overview.md` - how the system is meant to work
-- `docs/hardware-mods.md` - physical modifications to the ACE Pro
-- `docs/ktc-easy-integration.md` - what to change in your KTC-Easy macro flow
-- `config/examples/ace.cfg` - example ACE driver config
-- `config/examples/ace_ktc_macros.cfg` - example macros for load/unload and tool-aware ACE assist
-- `scripts/install-notes.md` - install checklist and bring-up order
+```text
+acepro-stealthchanger-ktc-repo/
+├── README.md
+├── LICENSE
+├── .gitignore
+├── docs/
+│   ├── 01-overview.md
+│   ├── 02-hardware-mods.md
+│   ├── 03-klipper-install.md
+│   ├── 04-ktc-workflow.md
+│   └── 05-tuning.md
+├── config/
+│   ├── ace.cfg
+│   └── ace_ktc_macros.cfg
+├── templates/
+│   └── printer.cfg.include.example
+└── scripts/
+    └── install-checklist.md
+```
 
 ## Recommended bring-up order
 
-1. Confirm your StealthChanger works normally with KTC-Easy first.[web:144][page:1]
-2. Connect the ACE Pro to Klipper and confirm the driver responds.[web:17][web:31]
-3. Modify the ACE filament exits and route one PTFE tube per toolhead.[web:45][web:67]
-4. Make ACE-assisted manual load/unload work from the console.
-5. Only then hook those steps into your KTC-Easy-friendly `LOAD_FILAMENT` and `UNLOAD_FILAMENT` macros.[web:154]
+1. Get StealthChanger working normally with KTC-Easy first.[web:144]
+2. Get the ACE Pro driver working from Klipper and confirm `ACE_INFO` responds.[web:17][web:31]
+3. Modify the ACE hardware and route one PTFE tube per tool.[web:45][web:67]
+4. Tune ACE load/unload on **one tool only**.
+5. Fold the ACE steps into `LOAD_FILAMENT` and `UNLOAD_FILAMENT`.
+6. Clone the working pattern to T1, T2, and T3.
+
+## Design assumption used in this repo
+
+Start simple:
+
+- ACE slot 0 -> T0
+- ACE slot 1 -> T1
+- ACE slot 2 -> T2
+- ACE slot 3 -> T3
+
+Keep that mapping until everything works.
 
 ## Important limitation
 
-The ACE Pro cannot really be treated as a fully standalone dryer/AMS brain in this setup. It needs a controller connection, and your Klipper macros provide the workflow logic when used off an Anycubic stock printer.[web:29][web:31]
+The ACE Pro is not truly standalone in this setup. It needs a live controller connection, and the workflow logic comes from your Klipper macros rather than stock Anycubic firmware behavior.[web:29][web:31]

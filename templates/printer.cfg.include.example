@@ -1,0 +1,4 @@
+# Example printer.cfg additions
+
+[include config/ace.cfg]
+[include config/ace_ktc_macros.cfg]
